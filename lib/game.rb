@@ -1,17 +1,41 @@
 # lib/game.rb
 require 'pry-byebug'
-require_relative 'input'
+require_relative 'messages'
 require_relative 'display'
+require 'msgpack'
+
 
 class Game
-  extend Input
+  extend Messages
   def initialize
-    @word_to_guess = random_word.split('')
+    @word_to_guess = random_word
     @letters_uncovered = Array.new(@word_to_guess.length)
     @guesses_made = []
     @display = Display.new
   end
+  def save
+    save_file = File.open("save", 'wb')
+    save_data = {word_to_guess: @word_to_guess,
+                 letters_uncovered: @letters_uncovered,
+                 guesses_made: @guesses_made}.to_msgpack
+    save_file.write(save_data)
+    save_file.close
+    Messages.save
+  end
+  def load()
+    if File.exists? "save"
+      save_data = File.read("save")
+      save_data = MessagePack.unpack(save_data)
+      @word_to_guess = save_data['word_to_guess']
+      @letters_uncovered = save_data['letters_uncovered']
+      @guesses_made = save_data['guesses_made']
+      @display.clear_screen
+      @display.show_game(@letters_uncovered, @guesses_made)
+    else
+      Messages.no_file
+    end
 
+  end
   def random_word
     dictionary_name = "words.txt"
     dictionary = File.open(dictionary_name)
@@ -26,13 +50,13 @@ class Game
     end
 
     dictionary.close
-    word.chomp
+    word.chomp.split('')
   end
   def make_guess
     puts "Guess a letter: "
     # Examples: from 'a\n' to 'Z\n'.
     acceptable = /(?<!.)[a-zA-Z]\n/
-    guess = Input.choose(acceptable).downcase
+    guess = handle_input(acceptable).downcase
 
     if @guesses_made.any? guess
       puts "You already made that guess"
@@ -41,6 +65,24 @@ class Game
       @guesses_made << guess
       uncover_letters(guess)
     end
+  end
+  def handle_input(acceptable_pattern)
+    print '> '
+    input = gets
+    exit if input == "q!\n"
+    if input == "s!\n"
+      save
+      handle_input(acceptable_pattern)
+    elsif input == "l!\n"
+      load
+      handle_input(acceptable_pattern)
+    end
+    choice = input.scan(acceptable_pattern)
+    if choice.length.zero?
+      Messages.bad_input
+      choice = handle_input(acceptable_pattern)
+    end
+    (choice.is_a? String) ? choice : choice.join('').chomp
   end
   def uncover_letters(guess_letter)
     match_count = 0
@@ -59,14 +101,7 @@ class Game
       @display.clear_screen
       @display.show_game(@letters_uncovered, @guesses_made)
     end
-  def victory
-    "You got it! Well done!"
   end
-  end
-end
-
-at_exit do
-  puts "Games was saved before exit!"
 end
 
 Game.new.play
