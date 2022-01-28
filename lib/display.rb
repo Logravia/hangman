@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 # lib/display.rb
 class Display
   def show_game(letters_uncovered, guesses_made)
-    print "Guesses you made: "
+    print 'Guesses you made: '
     print_arr(guesses_made)
-    print "Current result: "
+    print 'Current result: '
     print_arr(letters_uncovered)
     puts "\n\n\n"
   end
