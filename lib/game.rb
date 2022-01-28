@@ -1,7 +1,9 @@
 # lib/game.rb
 require 'pry-byebug'
+require_relative 'input'
 
 class Game
+  extend Input
   def initialize
     @word_to_guess = random_word
     @letters_uncovered = Array.new(@word_to_guess.length)
@@ -24,4 +26,22 @@ class Game
     dictionary.close
     word.chomp
   end
+  def guess
+    puts "Guess a letter: "
+    # Examples: from 'a\n' to 'Z\n'.
+    acceptable = /(?<!.)[a-zA-Z]\n/
+    guess = Input.choose(acceptable).downcase
+
+    if @guesses_made.any? guess
+      puts "You already made that guess"
+      guess
+    else
+      @guesses_made << guess
+    end
+  end
 end
+
+at_exit do
+  puts "Games was saved before exit!"
+end
+
