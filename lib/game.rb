@@ -5,7 +5,7 @@ require_relative 'input'
 class Game
   extend Input
   def initialize
-    @word_to_guess = random_word
+    @word_to_guess = random_word.split('')
     @letters_uncovered = Array.new(@word_to_guess.length)
     @guesses_made = []
   end
@@ -26,7 +26,7 @@ class Game
     dictionary.close
     word.chomp
   end
-  def guess
+  def make_guess
     puts "Guess a letter: "
     # Examples: from 'a\n' to 'Z\n'.
     acceptable = /(?<!.)[a-zA-Z]\n/
@@ -37,7 +37,26 @@ class Game
       guess
     else
       @guesses_made << guess
+      uncover_letters(guess)
     end
+  end
+  def uncover_letters(guess_letter)
+    match_count = 0
+    @word_to_guess.each_with_index do |letter, placement|
+     if letter == guess_letter
+       @letters_uncovered[placement] = letter
+       match_count += 1
+     end
+   end
+    match_count
+  end
+  def play
+    until @letters_uncovered == @word_to_guess
+      make_guess
+    end
+  def victory
+    "You got it! Well done!"
+  end
   end
 end
 
@@ -45,3 +64,4 @@ at_exit do
   puts "Games was saved before exit!"
 end
 
+Game.new.play
