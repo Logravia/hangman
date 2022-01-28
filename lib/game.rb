@@ -1,6 +1,7 @@
 # lib/game.rb
 require 'pry-byebug'
 require_relative 'input'
+require_relative 'display'
 
 class Game
   extend Input
@@ -8,6 +9,7 @@ class Game
     @word_to_guess = random_word.split('')
     @letters_uncovered = Array.new(@word_to_guess.length)
     @guesses_made = []
+    @display = Display.new
   end
 
   def random_word
@@ -51,8 +53,11 @@ class Game
     match_count
   end
   def play
+    @display.show_game(@letters_uncovered, @guesses_made)
     until @letters_uncovered == @word_to_guess
       make_guess
+      @display.clear_screen
+      @display.show_game(@letters_uncovered, @guesses_made)
     end
   def victory
     "You got it! Well done!"

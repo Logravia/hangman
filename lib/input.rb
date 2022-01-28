@@ -13,6 +13,6 @@ module Input
       bad_input_msg
       choice = choose(acceptable_pattern)
     end
-    choice.join.chomp
+    (choice.is_a? String) ? choice : choice.join('').chomp
   end
 end
