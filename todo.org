@@ -1,7 +1,0 @@
-* Inbox
-** DONE Prettifying of the output would be great.
-
-[[file:~/Proj/hangman/lib/display.rb::class Display]]
-** DONE Make sure it returns a word of specific length
-
-[[file:~/Proj/hangman/lib/game.rb::word.chomp.split('')]]
