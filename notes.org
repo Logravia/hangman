@@ -1,0 +1,14 @@
+* Inbox
+** [2022-01-29 Sat 01:35] Today was good coding and you did a fair bit
+
+[[file:~/Proj/hangman/lib/messages.rb::module Messages]]
+** [2022-01-29 Sat 01:31] Drawing lines, drawing remaining turns
+
+It might be a good idea to portray remaining turns something like this: [X][ ][ ][ ]
+Some line drawing of this kind might be nice as well
+-----+-----------+--------+-----------+-----------
+Add somes sense of sophistication
+
+In general I would recommend that you considering how your output would look.
+
+[[file:~/Proj/hangman/lib/display.rb::class Display]]

@@ -6,38 +6,37 @@ require_relative 'messages'
 require_relative 'display'
 require 'msgpack'
 
+MessagePack::DefaultFactory.register_type(0x00, Symbol)
+
 # Handles game input, game logic and holds game state
 class Game
   extend Messages
   def initialize
-    @word_to_guess = random_word
-    @letters_uncovered = Array.new(@word_to_guess.length)
-    @guesses_made = []
+    @state = {word_to_guess: random_word,
+              letters_uncovered: [],
+              guesses_made: []
+    }
+
+    @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
+
     @display = Display.new
   end
 
   def save
     save_file = File.open('save', 'wb')
-    save_data = { word_to_guess: @word_to_guess,
-                  letters_uncovered: @letters_uncovered,
-                  guesses_made: @guesses_made }.to_msgpack
+    save_data = @state.to_msgpack
     save_file.write(save_data)
     save_file.close
-    Messages.save
   end
 
   def load
     if File.exist? 'save'
       save_data = MessagePack.unpack(File.read('save'))
-
-      @word_to_guess = save_data['word_to_guess']
-      @letters_uncovered = save_data['letters_uncovered']
-      @guesses_made = save_data['guesses_made']
-
+      @state = save_data
       @display.clear_screen
-      @display.show_game(@letters_uncovered, @guesses_made)
+      @display.show(@state, Messages.load)
     else
-      Messages.no_file
+      @display.show(@state, Messages.no_file)
     end
   end
 
@@ -59,16 +58,16 @@ class Game
   end
 
   def make_guess
-    puts 'Guess a letter: '
+    puts 'Guess a letter ... '
     # Examples: from 'a\n' to 'Z\n'.
     acceptable = /(?<!.)[a-zA-Z]\n/
     guess = handle_input(acceptable).downcase
 
-    if @guesses_made.any? guess
+    if @state[:guesses_made].any? guess
       puts 'You already made that guess'
       guess
     else
-      @guesses_made << guess
+      @state[:guesses_made] << guess
       uncover_letters(guess)
     end
   end
@@ -100,21 +99,22 @@ class Game
 
   def uncover_letters(guess_letter)
     match_count = 0
-    @word_to_guess.each_with_index do |letter, placement|
+    @state[:word_to_guess].each_with_index do |letter, placement|
       if letter == guess_letter
-        @letters_uncovered[placement] = letter
+        @state[:letters_uncovered][placement] = letter
         match_count += 1
       end
     end
     match_count
   end
 
+  def victory?
+    @state[:letters_uncovered] == @state[:word_to_guess]
+  end
   def play
-    @display.show_game(@letters_uncovered, @guesses_made)
-    until @letters_uncovered == @word_to_guess
+    until victory?
       make_guess
-      @display.clear_screen
-      @display.show_game(@letters_uncovered, @guesses_made)
+      @display.show(@state, Messages.play)
     end
   end
 end

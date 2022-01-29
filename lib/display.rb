@@ -2,11 +2,13 @@
 
 # lib/display.rb
 class Display
-  def show_game(letters_uncovered, guesses_made)
+  def show(state, message)
+    clear_screen
+    print message
     print 'Guesses you made: '
-    print_arr(guesses_made)
+    print_arr(state[:guesses_made])
     print 'Current result: '
-    print_arr(letters_uncovered)
+    print_arr(state[:letters_uncovered])
     puts "\n\n\n"
   end
 
