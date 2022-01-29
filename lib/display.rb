@@ -2,14 +2,24 @@
 
 # lib/display.rb
 class Display
-  def show(state, message)
+  def show(state, message, error='')
     clear_screen
-    print message
     print 'Guesses you made: '
     print_arr(state[:guesses_made])
     print 'Current result: '
     print_arr(state[:letters_uncovered])
-    puts "\n\n\n"
+    padding
+    print message
+    padding
+    prompt
+  end
+
+  def padding
+    puts "\n\n"
+  end
+
+  def prompt
+    print '> '
   end
 
   def print_arr(arr)

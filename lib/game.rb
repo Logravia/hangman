@@ -6,6 +6,7 @@ require_relative 'messages'
 require_relative 'display'
 require 'msgpack'
 
+# Makes sure the symbols survive serialization/deserialization
 MessagePack::DefaultFactory.register_type(0x00, Symbol)
 
 # Handles game input, game logic and holds game state
@@ -27,6 +28,7 @@ class Game
     save_data = @state.to_msgpack
     save_file.write(save_data)
     save_file.close
+    @display.show(@state, Messages.save)
   end
 
   def load
@@ -38,6 +40,10 @@ class Game
     else
       @display.show(@state, Messages.no_file)
     end
+  end
+
+  def help
+    @display.show(@state, Messages.help)
   end
 
   def random_word
@@ -58,14 +64,13 @@ class Game
   end
 
   def make_guess
-    puts 'Guess a letter ... '
     # Examples: from 'a\n' to 'Z\n'.
     acceptable = /(?<!.)[a-zA-Z]\n/
     guess = handle_input(acceptable).downcase
 
     if @state[:guesses_made].any? guess
-      puts 'You already made that guess'
-      guess
+      @display.show(@state, Messages.same_guess)
+      make_guess
     else
       @state[:guesses_made] << guess
       uncover_letters(guess)
@@ -78,20 +83,20 @@ class Game
       exit
     when "s!\n"
       save
-      handle_input(acceptable_pattern)
     when "l!\n"
       load
-      handle_input(acceptable_pattern)
+    when "h!\n"
+      help
     end
   end
 
   def handle_input(acceptable_pattern)
-    print '> '
     input = gets
     handle_special_cases(input, acceptable_pattern)
     choice = input.scan(acceptable_pattern)
     if choice.length.zero?
-      Messages.bad_input
+      @display.show(@state, Messages.bad_input)
+      handle_special_cases(input, acceptable_pattern)
       choice = handle_input(acceptable_pattern)
     end
     (choice.is_a? String) ? choice : choice.join('').chomp
@@ -112,6 +117,7 @@ class Game
     @state[:letters_uncovered] == @state[:word_to_guess]
   end
   def play
+    @display.show(@state, Messages.intro)
     until victory?
       make_guess
       @display.show(@state, Messages.play)
