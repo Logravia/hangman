@@ -16,11 +16,10 @@ class Game
   private_constant :LAST_TURN, :MIN_WORD_LENGTH
   extend Messages
   def initialize
-    @state = {word_to_guess: random_word,
-              letters_uncovered: [],
-              guesses_made: [],
-              turn: 0
-    }
+    @state = { word_to_guess: random_word,
+               letters_uncovered: [],
+               guesses_made: [],
+               turn: 0 }
 
     @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
 
@@ -64,9 +63,7 @@ class Game
     end
 
     dictionary.close
-    if word.length < MIN_WORD_LENGTH
-      word = random_word
-    end
+    word = random_word if word.length < MIN_WORD_LENGTH
     word
   end
 
@@ -125,12 +122,13 @@ class Game
   def victory?
     @state[:letters_uncovered] == @state[:word_to_guess]
   end
+
   def play
     @display.show(@state, Messages.intro)
 
     until @state[:turn] == LAST_TURN || victory?
       make_guess
-      @state[:turn]+= 1
+      @state[:turn] += 1
       @display.show(@state, Messages.play)
     end
 
@@ -140,20 +138,16 @@ class Game
       @display.show(@state, Messages.loss)
     end
 
-    if gets == "r!\n"
-      replay
-    end
-
+    replay if gets == "r!\n"
   end
 
-    def replay
-      @state[:word_to_guess] = random_word
-      @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
-      @state[:guesses_made] = []
-      @state[:turn] = 0
-      play
-    end
-
+  def replay
+    @state[:word_to_guess] = random_word
+    @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
+    @state[:guesses_made] = []
+    @state[:turn] = 0
+    play
+  end
 end
 
 Game.new.play
