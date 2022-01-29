@@ -36,6 +36,14 @@ module Messages
   end
 
   def self.help
-    "To quit enter: q!\nTo save the game enter: s!\nTo load previous session: l!\nTo continue the game enter a guess ..."
+    "To quit enter: q!\nTo save the game enter: s!\nTo load previous session: l!\nTo restart the game enter r!\nTo continue the game enter a guess ..."
+  end
+
+  def self.victory
+    "Congratulations you won!\nEnter r! for another game or a any key to quit ..."
+  end
+
+  def self.loss
+    'Bad luck, you lost. Enter r! for another game or any key to quit ...'
   end
 end

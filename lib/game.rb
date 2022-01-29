@@ -11,11 +11,15 @@ MessagePack::DefaultFactory.register_type(0x00, Symbol)
 
 # Handles game input, game logic and holds game state
 class Game
+  LAST_TURN = 12
+  MIN_WORD_LENGTH = 8
+  private_constant :LAST_TURN, :MIN_WORD_LENGTH
   extend Messages
   def initialize
     @state = {word_to_guess: random_word,
               letters_uncovered: [],
-              guesses_made: []
+              guesses_made: [],
+              turn: 0
     }
 
     @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
@@ -55,12 +59,15 @@ class Game
     random_line = rand(0..line_count)
 
     until cur_line == random_line
-      word = dictionary.readline
+      word = dictionary.readline.chomp
       cur_line += 1
     end
 
     dictionary.close
-    word.chomp.split('')
+    if word.length < MIN_WORD_LENGTH
+      word = random_word
+    end
+    word
   end
 
   def make_guess
@@ -77,7 +84,7 @@ class Game
     end
   end
 
-  def handle_special_cases(input, acceptable_pattern)
+  def special_input(input)
     case input
     when "q!\n"
       exit
@@ -87,16 +94,18 @@ class Game
       load
     when "h!\n"
       help
+    when "r!\n"
+      replay
     end
   end
 
   def handle_input(acceptable_pattern)
     input = gets
-    handle_special_cases(input, acceptable_pattern)
+    special_input(input)
     choice = input.scan(acceptable_pattern)
     if choice.length.zero?
       @display.show(@state, Messages.bad_input)
-      handle_special_cases(input, acceptable_pattern)
+      special_input(input)
       choice = handle_input(acceptable_pattern)
     end
     (choice.is_a? String) ? choice : choice.join('').chomp
@@ -118,11 +127,33 @@ class Game
   end
   def play
     @display.show(@state, Messages.intro)
-    until victory?
+
+    until @state[:turn] == LAST_TURN || victory?
       make_guess
+      @state[:turn]+= 1
       @display.show(@state, Messages.play)
     end
+
+    if victory?
+      @display.show(@state, Messages.victory)
+    else
+      @display.show(@state, Messages.loss)
+    end
+
+    if gets == "r!\n"
+      replay
+    end
+
   end
+
+    def replay
+      @state[:word_to_guess] = random_word
+      @state[:letters_uncovered] = Array.new(@state[:word_to_guess].length)
+      @state[:guesses_made] = []
+      @state[:turn] = 0
+      play
+    end
+
 end
 
 Game.new.play

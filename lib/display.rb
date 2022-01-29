@@ -2,14 +2,18 @@
 
 # lib/display.rb
 class Display
-  def show(state, message, error='')
+  def show(state, message)
     clear_screen
-    print 'Guesses you made: '
+    stripe
+    turns_left(state)
+    print 'Guesses made: '
     print_arr(state[:guesses_made])
-    print 'Current result: '
+    print 'Letters uncovered: '
     print_arr(state[:letters_uncovered])
+    stripe
     padding
     print message
+    padding
     padding
     prompt
   end
@@ -18,8 +22,23 @@ class Display
     puts "\n\n"
   end
 
+  def stripe
+    puts '+---------------+---------------+---------------+'
+  end
+
   def prompt
     print '> '
+  end
+
+  def turns_left(state)
+    print 'Turns left: '
+    state[:turn].times do
+      print '[X]'
+    end
+    (12 - state[:turn]).times do
+      print '[ ]'
+    end
+    puts ''
   end
 
   def print_arr(arr)

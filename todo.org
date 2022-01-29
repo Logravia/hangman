@@ -1,7 +1,7 @@
 * Inbox
-** TODO Prettifying of the output would be great.
+** DONE Prettifying of the output would be great.
 
 [[file:~/Proj/hangman/lib/display.rb::class Display]]
-** TODO Make sure it returns a word of specific length
+** DONE Make sure it returns a word of specific length
 
 [[file:~/Proj/hangman/lib/game.rb::word.chomp.split('')]]
